@@ -89,7 +89,7 @@ public class ADSUser {
 			      "objectclass: inetOrgPerson",
 			      "objectclass: organizationalPerson",
 			      "objectclass: person",
-			      "objectclass: fcPerson",
+			      "objectclass: extensibleObject",
 			      "objectclass: top",
 			      "cn", cn,
 			      "description: Demo user",
