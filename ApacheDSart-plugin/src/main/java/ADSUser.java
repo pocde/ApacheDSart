@@ -79,6 +79,18 @@ public class ADSUser {
 		 getEntry().add(attr, value);
 	 }
 	 
+	 
+	 /*
+	  * decrypt the users password
+	  */
+	 public byte[] decryptPass(String userPassword, String algorythm){
+		 byte[] newPass;
+		 
+		 newPass = userPassword.getBytes();
+		 
+		 return newPass;
+	 }
+	 
 	 @Action(value = "addUserToADS",
 			 description = "adds a user to the Apache Directory Server",
 			 outputs = { @Output(OutputNames.RETURN_RESULT) },
@@ -88,18 +100,25 @@ public class ADSUser {
 	 }	
 	 )	
 	 public Map<String,String> addUserToADS (
-			 @Param(value = "username") String username,
-			 @Param(value = "password") String password,
-			 @Param(value = "host") String host,
+			 @Param(value = "username", required = true) String username,
+			 @Param(value = "password", encrypted = true) String password,
+			 @Param(value = "host", required = true) String host,
 			 @Param(value = "port") String portStr,
-			 @Param(value = "DN") String dn
+			 @Param(value = "DN", required = true) String dn,
+			 @Param(value = "objectClasses") String objClasses,
+			 @Param(value = "entries") String entries,
+			 @Param(value = "userPassword", encrypted = true) String userPassword,
+			 @Param(value = "passwordAlg") String algorythm
 			 )
 	 {
 		 Map<String, String> resultMap = new HashMap<String, String>();
 		 int port = 10389;  // default port for Apache Directory Server
+		 String[] objects = objClasses.split(",");
+		 
+		 Dn udn = null;
 
 		 try {
-			Dn udn = new Dn(dn);
+			udn = new Dn(dn);
 		} catch (LdapInvalidDnException e) {
 			 resultMap.put("resultMessage", "could not get DN");
 			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(2));
@@ -131,8 +150,46 @@ public class ADSUser {
 		  * here we start our main code!
 		  */
 		 
-
+		 newEntry(udn);
+		 
+		 for(String obj: objects) {
+			 try {
+				addEntry("objectclass", obj);
+			} catch (LdapException e) {
+				/* do nothing */
+			}
+		 }
 		
+		 for (String en: entries.split(";")) {
+			 String key = en.split("=")[0];
+			 String value = en.split("=")[1];
+			 try {
+				addEntry(key, value);
+			} catch (LdapException e) {
+				/* do nothing */
+			}
+		 }
+		 
+		 if (!userPassword.isEmpty()) {
+			 try {
+				 if (!algorythm.isEmpty()) {
+					 userPassword = "";
+				 }
+				 addEntry("userPassword", userPassword);
+			 } catch (LdapException e) {
+				 /* do nothing */
+			 }
+		 }
+		 
+		/* System.out.println(getEntry().toString());
+		 try {
+			getConnection().add(getEntry());
+		} catch (LdapException e1) {
+			resultMap.put("resultMessage", "could not add entry to server");
+			resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(4));
+			return resultMap;
+		} */
+		 
 		 /*
 		  * before we return from this step we need to clean up the connection
 		  * to the LDAP server
@@ -142,10 +199,12 @@ public class ADSUser {
 			 getConnection().close();
 		 } catch (LdapException e) {
 			 resultMap.put("resultMessage", "could not unbind connection to LDAP server");
-			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(1));
+			 return resultMap;
 		 } catch (IOException e) {
 			 resultMap.put("resultMessage", "could not close connection to LDAP server");
-			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(1));
+			 return resultMap;
 		 }
 		
 		

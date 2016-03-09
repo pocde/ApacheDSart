@@ -1,6 +1,7 @@
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,12 @@ public class ADSUserTest {
 	String password="secret";
 	String host="codar.poc.de1.cc";
 	String portStr="10389";
-	String dn = "cn=Users,ou=CSAGroups,dc=example,dc=com";
+	String uid = "markus";
+	String dn = "uid="+uid+",ou=CSAUsers,dc=example,dc=com";
+	String objects = "inetOrgPerson,Person,organizationalPerson,extensibleObject";
+	String entries = "uid="+uid+";cn=markus;sn=Markus";
+	String userPassword = "humble";
+	String alg="SHA2";
 	
 
 	@Test
@@ -25,12 +31,13 @@ public class ADSUserTest {
 		Map<String,String> result = new HashMap<String,String>();
 
 		ADSUser user = new ADSUser();
-		result = user.addUserToADS(username, password, host, portStr, dn);
+		result = user.addUserToADS(username, password, host, portStr, 
+					dn, objects, entries, userPassword, alg);
 		
 		if (result.get("returnResult").length() > 1) fail("Return Result < 0");
 		String ret=result.get("returnResult");
 		
-		System.out.println(result.get("resultMessage"));
+		System.out.println("Return message: "+result.get("resultMessage"));
 		
 		/* if connection could be established and all subsequent 
 		 * command are working as desired the return value will be 0.
@@ -99,6 +106,18 @@ public class ADSUserTest {
 		
 		assertTrue("could not add entry 'inetOrgPerson'", 
 				user.getEntry().contains("objectclass", "inetOrgPerson"));
+	}
+	
+	@Test
+	public void testEncryption()
+	{
+		ADSUser user = new ADSUser();
+		byte[] pass;
+		
+		pass = user.decryptPass("password", "SHA1");
+		
+		String password = new String(pass, Charset.forName("UTF-8"));
+		System.out.println("Password: <"+password+">");
 	}
 
 }
