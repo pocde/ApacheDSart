@@ -1,13 +1,10 @@
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.directory.api.ldap.model.constants.LdapSecurityConstants;
-import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.api.ldap.model.name.Dn;
@@ -29,7 +26,7 @@ public class ADSUserTest {
 	LdapSecurityConstants lsc = LdapSecurityConstants.HASH_METHOD_SHA;
 	
 
-	@Test
+	
 	public void testAddUserToADS() {
 		Map<String,String> result = new HashMap<String,String>();
 
@@ -131,5 +128,4 @@ public class ADSUserTest {
 		assertTrue("passwords are not the same",
 				PasswordUtil.compareCredentials(userPassword.getBytes(), pass));
 	}
-
 }
