@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,8 @@ import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidAttributeValueException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.api.ldap.model.name.Dn;
+import org.apache.directory.api.ldap.model.password.PasswordUtil;
+import org.apache.directory.api.ldap.model.constants.LdapSecurityConstants;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 
@@ -81,16 +84,15 @@ public class ADSUser {
 	 
 	 
 	 /*
-	  * decrypt the users password
+	  * encrypt the users password
 	  */
-	 public byte[] decryptPass(String userPassword, String algorythm){
-		 byte[] newPass;
+	 public String encryptPass(String userPassword, LdapSecurityConstants algorythm){
 		 
-		 newPass = userPassword.getBytes();
-		 
-		 return newPass;
+		 byte[] pass = PasswordUtil.createStoragePassword(userPassword, algorythm);
+		 return new String(pass, StandardCharsets.UTF_8);
 	 }
 	 
+	  
 	 @Action(value = "addUserToADS",
 			 description = "adds a user to the Apache Directory Server",
 			 outputs = { @Output(OutputNames.RETURN_RESULT) },
@@ -108,11 +110,12 @@ public class ADSUser {
 			 @Param(value = "objectClasses") String objClasses,
 			 @Param(value = "entries") String entries,
 			 @Param(value = "userPassword", encrypted = true) String userPassword,
-			 @Param(value = "passwordAlg") String algorythm
+			 @Param(value = "passwordAlg") String lsc
 			 )
 	 {
 		 Map<String, String> resultMap = new HashMap<String, String>();
 		 int port = 10389;  // default port for Apache Directory Server
+		 LdapSecurityConstants algorythm = LdapSecurityConstants.valueOf(lsc);
 		 String[] objects = objClasses.split(",");
 		 
 		 Dn udn = null;
@@ -172,23 +175,23 @@ public class ADSUser {
 		 
 		 if (!userPassword.isEmpty()) {
 			 try {
-				 if (!algorythm.isEmpty()) {
-					 userPassword = "";
+				 if (lsc.isEmpty()) {
+					 algorythm = LdapSecurityConstants.HASH_METHOD_SHA;
 				 }
-				 addEntry("userPassword", userPassword);
+				 addEntry("userPassword", encryptPass(userPassword, algorythm));
 			 } catch (LdapException e) {
-				 /* do nothing */
+				 System.out.println("could not add password properly");
+				 e.printStackTrace();
 			 }
 		 }
 		 
-		/* System.out.println(getEntry().toString());
-		 try {
+		try {
 			getConnection().add(getEntry());
 		} catch (LdapException e1) {
 			resultMap.put("resultMessage", "could not add entry to server");
 			resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(4));
 			return resultMap;
-		} */
+		}
 		 
 		 /*
 		  * before we return from this step we need to clean up the connection
@@ -213,36 +216,4 @@ public class ADSUser {
 		
 		 return resultMap;
 	 }
-
-	public void addUser(String uid, String givenname, String partyid, String password) 
-
-			  throws Exception
-			  {
-			    String cn = uid;
-			    String email = uid; 
-			    String sn = givenname; 
-			    String usersDn = "uid=" + uid + ",cn=Users,dc=in,dc=example,dc=com";
-			    Dn udn = new Dn(usersDn);
-			    //getConnection().lookup(udn); -Useful to verify DN
-			    DefaultEntry de = new DefaultEntry(
-			      udn, // The Dn
-			      "objectclass: inetOrgPerson",
-			      "objectclass: organizationalPerson",
-			      "objectclass: person",
-			      "objectclass: extensibleObject",
-			      "objectclass: top",
-			      "cn", cn,
-			      "description: Demo user",
-			      "givenname", givenname,
-			      "mail", email,
-			      "preferredlanguage: en",
-			      "sn", sn,
-			      "uid", uid,
-			      "userpassword", password
-			    ); 
-			    //connection.add(de);
-			    System.out.println("Entry addition successful"); 
-			  }
-	
-	
 }

@@ -2,13 +2,16 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.directory.api.ldap.model.constants.LdapSecurityConstants;
 import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
 import org.apache.directory.api.ldap.model.name.Dn;
+import org.apache.directory.api.ldap.model.password.PasswordUtil;
 import org.junit.Test;
 
 public class ADSUserTest {
@@ -22,8 +25,8 @@ public class ADSUserTest {
 	String dn = "uid="+uid+",ou=CSAUsers,dc=example,dc=com";
 	String objects = "inetOrgPerson,Person,organizationalPerson,extensibleObject";
 	String entries = "uid="+uid+";cn=markus;sn=Markus";
-	String userPassword = "humble";
-	String alg="SHA2";
+	String userPassword = "cloud"; // "{SHA}AA55PbcMWTCfpvDzbQBG0RDzvjw="; // cloud
+	LdapSecurityConstants lsc = LdapSecurityConstants.HASH_METHOD_SHA;
 	
 
 	@Test
@@ -32,12 +35,12 @@ public class ADSUserTest {
 
 		ADSUser user = new ADSUser();
 		result = user.addUserToADS(username, password, host, portStr, 
-					dn, objects, entries, userPassword, alg);
+					dn, objects, entries, userPassword, lsc.toString());
 		
 		if (result.get("returnResult").length() > 1) fail("Return Result < 0");
 		String ret=result.get("returnResult");
 		
-		System.out.println("Return message: "+result.get("resultMessage"));
+		// System.out.println("Return message: "+result.get("resultMessage"));
 		
 		/* if connection could be established and all subsequent 
 		 * command are working as desired the return value will be 0.
@@ -112,12 +115,21 @@ public class ADSUserTest {
 	public void testEncryption()
 	{
 		ADSUser user = new ADSUser();
-		byte[] pass;
 		
-		pass = user.decryptPass("password", "SHA1");
+		/*
+		 * this test will use a password, encrypt it with a algorythm. The result is then
+		 * used to check if the password was encrypted by the given algorythm.
+		 * At the end we make use of an Ldap method to see if the original password
+		 * matches the encrypted one.
+		 */
 		
-		String password = new String(pass, Charset.forName("UTF-8"));
-		System.out.println("Password: <"+password+">");
+		byte[] pass = user.encryptPass(userPassword, lsc).getBytes();
+		
+		assertTrue("password encryption did not work", 
+				PasswordUtil.findAlgorithm(pass).equals(lsc));
+		
+		assertTrue("passwords are not the same",
+				PasswordUtil.compareCredentials(userPassword.getBytes(), pass));
 	}
 
 }
