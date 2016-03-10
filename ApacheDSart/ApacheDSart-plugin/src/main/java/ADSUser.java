@@ -3,6 +3,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.directory.api.ldap.model.entry.DefaultEntry;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
@@ -24,6 +27,11 @@ import com.hp.oo.sdk.content.plugin.ActionMetadata.ResponseType;
 
 public class ADSUser {
 
+	/*
+	 * set up logging first
+	 */
+	static Logger logger = LoggerFactory.getLogger(ADSUser.class);
+	
 	/*
 	 * firt we handle Ldap connections
 	 */
@@ -91,15 +99,20 @@ public class ADSUser {
 	 }
 	 
 	  
-	 @Action(value = "addUserToADS",
-			 description = "adds a user to the Apache Directory Server",
+	 @Action(value = "addObjectToADS",
+			 description = "adds an object to the Apache Directory Server\n"+
+					 		"An object could be an user or a group.\n"+
+					 		"\nInputs:\n"+
+					 		"objectClasses: comma separated list of objectclass"+
+					 		"to add. The objectclass 'top' will be added by default.\n"+
+					 		"entries: list of entires to add. Format: key:value;key:value...",
 			 outputs = { @Output(OutputNames.RETURN_RESULT) },
 			 responses = {
 					 @Response(text = ResponseNames.SUCCESS, field = OutputNames.RETURN_RESULT, value = "0", matchType = MatchType.COMPARE_GREATER_OR_EQUAL, responseType = ResponseType.RESOLVED),
 					 @Response(text = ResponseNames.FAILURE, field = OutputNames.RETURN_RESULT, value = "0", matchType = MatchType.COMPARE_LESS, responseType = ResponseType.ERROR)
 	 }	
 	 )	
-	 public Map<String,String> addUserToADS (
+	 public Map<String,String> addObjectToADS (
 			 @Param(value = "username", required = true) String username,
 			 @Param(value = "password", encrypted = true) String password,
 			 @Param(value = "host", required = true) String host,
@@ -157,20 +170,26 @@ public class ADSUser {
 			 try {
 				addEntry("objectclass", obj);
 			} catch (LdapException e) {
-				/* do nothing */
+				logger.info("objectclass problem: "+obj);
 			}
 		 }
 		
+		 /*
+		  * sting is split by ; and : because we commas and equal signs
+		  */
 		 for (String en: entries.split(";")) {
-			 String key = en.split("=")[0];
-			 String value = en.split("=")[1];
+			 String key = en.split(":")[0];
+			 String value = en.split(":")[1];
 			 try {
 				addEntry(key, value);
 			} catch (LdapException e) {
-				/* do nothing */
+				logger.info("key value pair problem: "+key+" "+value);
 			}
 		 }
 		 
+		 /*
+		  * if necessary encrypt password with algorythm
+		  */
 		 if (!userPassword.isEmpty()) {
 			 try {
 				 if (lsc.isEmpty()) {
@@ -182,11 +201,12 @@ public class ADSUser {
 				 e.printStackTrace();
 			 }
 		 }
-		 
+		
 		try {
 			getConnection().add(getEntry());
-		} catch (LdapException e1) {
+		} catch (LdapException e) {
 			resultMap.put("resultMessage", "could not add entry to server");
+			resultMap.put("addMessage", e.getMessage());
 			resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(4));
 			return resultMap;
 		}
@@ -199,6 +219,7 @@ public class ADSUser {
 			 getConnection().unBind();
 			 getConnection().close();
 		 } catch (LdapException e) {
+			 logger.info("could not close connection to Ldap server: "+host);
 			 resultMap.put("resultMessage", "could not unbind connection to LDAP server");
 			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(1));
 			 return resultMap;
@@ -207,7 +228,7 @@ public class ADSUser {
 			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(1));
 			 return resultMap;
 		 }
-		
+		 
 		
 		 resultMap.put("resultMessage", "server reachable");
 		 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
@@ -215,3 +236,4 @@ public class ADSUser {
 		 return resultMap;
 	 }
 }
+

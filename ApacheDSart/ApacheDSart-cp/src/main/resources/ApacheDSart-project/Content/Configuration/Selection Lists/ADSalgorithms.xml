@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selectionList id="d3161338-b075-4beb-9eb6-bde90a422e8a">
+  
+  <annotation>d3161338-b075-4beb-9eb6-bde90a422e8a.description</annotation>
+  <name>Apache Directory Server password algorithm</name>
+  <storage>
+    <string>HASH_METHOD_CRYPT</string>
+    <string>HASH_METHOD_MD5</string>
+    <string>HASH_METHOD_PKCS5S2</string>
+    <string>HASH_METHOD_SHA</string>
+    <string>HASH_METHOD_SHA256</string>
+    <string>HASH_METHOD_SHA384</string>
+    <string>HASH_METHOD_SHA512</string>
+    <string>HASH_METHOD_SMD5</string>
+    <string>HASH_METHOD_SSHA</string>
+	<string>HASH_METHOD_SSHA256</string>
+	<string>HASH_METHOD_SSHA384</string>
+	<string>HASH_METHOD_SSHA512</string>
+  </storage>
+</selectionList>
