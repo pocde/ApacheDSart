@@ -186,7 +186,7 @@
   <plugin>
     <groupId>ApacheGroup</groupId>
     <artifactId>ApacheDSart-plugin</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <actionName>addObjectToADS</actionName>
   </plugin>
   <fieldValues/>
