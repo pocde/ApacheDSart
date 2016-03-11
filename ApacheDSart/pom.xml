@@ -7,8 +7,8 @@
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <name>OO sample content project</name>
-    <url>http://www.hp.com</url>
+    <name>Apache Directory Server Steps</name>
+    <url>http://www.hpe.com</url>
 
     <properties>
         <sdk.group>com.hp.oo.sdk</sdk.group>
@@ -28,4 +28,8 @@
         <module>ApacheDSart-plugin</module>
         <module>ApacheDSart-cp</module>
     </modules>
+    <description>This content pack has a step for HPE Operations Orchestration to create entries in Apache Directory Server.</description>
+    <scm>
+    	<url>https://github.com/pocde/ApacheDSart</url>
+    </scm>
 </project>

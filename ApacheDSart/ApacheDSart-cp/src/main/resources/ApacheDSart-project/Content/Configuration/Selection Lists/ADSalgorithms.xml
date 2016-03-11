@@ -13,8 +13,8 @@
     <string>HASH_METHOD_SHA512</string>
     <string>HASH_METHOD_SMD5</string>
     <string>HASH_METHOD_SSHA</string>
-	<string>HASH_METHOD_SSHA256</string>
-	<string>HASH_METHOD_SSHA384</string>
-	<string>HASH_METHOD_SSHA512</string>
+    <string>HASH_METHOD_SSHA256</string>
+    <string>HASH_METHOD_SSHA384</string>
+    <string>HASH_METHOD_SSHA512</string>
   </storage>
 </selectionList>
