@@ -135,7 +135,7 @@ public class ADSUser {
 			udn = new Dn(dn);
 		} catch (LdapInvalidDnException e) {
 			 resultMap.put("resultMessage", "could not get DN");
-			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(2));
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-2));
 			 return resultMap;
 		}
 		
@@ -156,7 +156,7 @@ public class ADSUser {
 			 connectAndBind(host, port, username, password);
 		 } catch (Exception e) {
 			 resultMap.put("resultMessage", "server not reachable");
-			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(1));
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
 			 return resultMap;
 		 }
 		 
@@ -207,7 +207,7 @@ public class ADSUser {
 		} catch (LdapException e) {
 			resultMap.put("resultMessage", "could not add entry to server");
 			resultMap.put("addMessage", e.getMessage());
-			resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(4));
+			resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-4));
 			return resultMap;
 		}
 		 
@@ -221,16 +221,16 @@ public class ADSUser {
 		 } catch (LdapException e) {
 			 logger.info("could not close connection to Ldap server: "+host);
 			 resultMap.put("resultMessage", "could not unbind connection to LDAP server");
-			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(1));
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
 			 return resultMap;
 		 } catch (IOException e) {
 			 resultMap.put("resultMessage", "could not close connection to LDAP server");
-			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(1));
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
 			 return resultMap;
 		 }
 		 
 		
-		 resultMap.put("resultMessage", "server reachable");
+		 resultMap.put("resultMessage", "entry added as:\n"+getEntry().toString());
 		 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
 		
 		 return resultMap;

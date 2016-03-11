@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <selectionList id="d3161338-b075-4beb-9eb6-bde90a422e8a">
-  
+  <descriptionCdata>
+
+<![CDATA[d3161338-b075-4beb-9eb6-bde90a422e8a.description=List of all algorithms allowed ]]>
+
+</descriptionCdata>
   <annotation>d3161338-b075-4beb-9eb6-bde90a422e8a.description</annotation>
   <name>Apache Directory Server password algorithm</name>
   <storage>

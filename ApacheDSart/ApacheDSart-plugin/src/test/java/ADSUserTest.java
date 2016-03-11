@@ -40,7 +40,7 @@ public class ADSUserTest {
 		result = user.addObjectToADS(username, password, host, portStr, 
 					dn, objects, entries, userPassword, lsc.toString());
 		
-		if (result.get("returnResult").length() > 1) fail("Return Result < 0");
+		if (result.get("returnResult").length() < 0) fail("Return Result < 0");
 		String ret=result.get("returnResult");
 			
 		/* if connection could be established and all subsequent 
@@ -54,7 +54,7 @@ public class ADSUserTest {
 		 */
 		if (lazy) {
 			assertTrue("Error message: "+result.get("resultMessage"), 
-					ret.equals("0") || ret.equals("4"));
+					ret.equals("0") || ret.equals("-4"));
 			System.out.println("message: "+result.get("addMessage"));
 		} else {
 			assertTrue("Error message: "+result.get("resultMessage"), ret.equals("0"));
