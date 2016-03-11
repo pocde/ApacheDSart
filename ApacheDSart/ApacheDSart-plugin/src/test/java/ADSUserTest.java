@@ -19,6 +19,9 @@ public class ADSUserTest {
 	String password="secret";
 	String host="codar.poc.de1.cc";
 	String portStr="10389";
+	String groupDn="cn=OOTestGroup,ou=CODARProjects,dc=example,dc=com";
+	String groupObjects="groupOfNames";
+	String groupEntries = "cn:OOTestGroup;member:uid=markus,ou=CSAUsers,dc=example,dc=com";
 	String uid = "markus";
 	String dn = "uid="+uid+",ou=CSAUsers,dc=example,dc=com";
 	String objects = "inetOrgPerson,Person,organizationalPerson,extensibleObject";
@@ -35,10 +38,13 @@ public class ADSUserTest {
 	@Test
 	public void testAddUserToADS() {
 		Map<String,String> result = new HashMap<String,String>();
-
+		String lscString = "";
+		
+		if (lsc != null) lscString = lsc.toString();
+		
 		ADSUser user = new ADSUser();
 		result = user.addObjectToADS(username, password, host, portStr, 
-					dn, objects, entries, userPassword, lsc.toString());
+					dn, objects, entries, userPassword, lscString);
 		
 		if (result.get("returnResult").length() < 0) fail("Return Result < 0");
 		String ret=result.get("returnResult");
@@ -60,6 +66,36 @@ public class ADSUserTest {
 			assertTrue("Error message: "+result.get("resultMessage"), ret.equals("0"));
 		}
 	}
+
+	@Test
+	public void testAddGroupToADS() {
+		Map<String,String> result = new HashMap<String,String>();
+		
+		ADSUser user = new ADSUser();
+		result = user.addObjectToADS(username, password, host, portStr, 
+					groupDn, groupObjects, groupEntries, "" /* userpassword*/ , "" /* algorithm */);
+		
+		if (result.get("returnResult").length() < 0) fail("Return Result < 0");
+		String ret=result.get("returnResult");
+			
+		/* if connection could be established and all subsequent 
+		 * command are working as desired the return value will be 0.
+		 */
+		
+		/*
+		 * if lazy is true we can skip to write the object to ldap.
+		 * returnResult 4 means that only writing back did not work, 
+		 * probably because it alredy exists.  
+		 */
+		if (lazy) {
+			assertTrue("Error message: "+result.get("resultMessage"), 
+					ret.equals("0") || ret.equals("-4"));
+			System.out.println("message: "+result.get("addMessage"));
+		} else {
+			assertTrue("Error message: "+result.get("resultMessage"), ret.equals("0"));
+		}
+	}
+
 	
 	/*
 	 * the following test only tests if a connection to the LDAP server
@@ -134,12 +170,17 @@ public class ADSUserTest {
 		ADSUser user = new ADSUser();
 		
 		/*
+		 * check if there is anything to do
+		 */
+		if (userPassword.isEmpty()) return;
+		
+		/*
 		 * this test will use a password, encrypt it with a algorythm. The result is then
 		 * used to check if the password was encrypted by the given algorythm.
 		 * At the end we make use of an Ldap method to see if the original password
 		 * matches the encrypted one.
 		 */
-		
+				
 		byte[] pass = user.encryptPass(userPassword, lsc).getBytes();
 		
 		assertTrue("password encryption did not work", 

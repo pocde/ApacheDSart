@@ -92,9 +92,9 @@ public class ADSUser {
 	 /*
 	  * encrypt the users password
 	  */
-	 public String encryptPass(String userPassword, LdapSecurityConstants algorythm){
+	 public String encryptPass(String userPassword, LdapSecurityConstants algorithm){
 		 
-		 byte[] pass = PasswordUtil.createStoragePassword(userPassword, algorythm);
+		 byte[] pass = PasswordUtil.createStoragePassword(userPassword, algorithm);
 		 return new String(pass, StandardCharsets.UTF_8);
 	 }
 	 
@@ -126,8 +126,17 @@ public class ADSUser {
 	 {
 		 Map<String, String> resultMap = new HashMap<String, String>();
 		 int port = 10389;  // default port for Apache Directory Server
-		 LdapSecurityConstants algorythm = LdapSecurityConstants.valueOf(lsc);
+		 LdapSecurityConstants algorithm = null;
 		 String[] objects = objClasses.split(",");
+		 
+		 if (!lsc.isEmpty()) try {
+			 algorithm = LdapSecurityConstants.valueOf(lsc);
+		 } catch (Exception e) {
+			 logger.info("algorithm not found");
+			 resultMap.put("resultMessage", "could not get algorithm");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-2));
+			 return resultMap;
+		 }
 		 
 		 Dn udn = null;
 
@@ -188,14 +197,15 @@ public class ADSUser {
 		 }
 		 
 		 /*
-		  * if necessary encrypt password with algorythm
+		  * if necessary encrypt password with algorithm
 		  */
 		 if (!userPassword.isEmpty()) {
 			 try {
 				 if (lsc.isEmpty()) {
-					 algorythm = LdapSecurityConstants.HASH_METHOD_SHA;
+					 addEntry("userPassword", userPassword);
+				 } else {
+					 addEntry("userPassword", encryptPass(userPassword, algorithm));
 				 }
-				 addEntry("userPassword", encryptPass(userPassword, algorythm));
 			 } catch (LdapException e) {
 				 System.out.println("could not add password properly");
 				 e.printStackTrace();
@@ -230,7 +240,7 @@ public class ADSUser {
 		 }
 		 
 		
-		 resultMap.put("resultMessage", "entry added as:\n"+getEntry().toString());
+		 resultMap.put("resultMessage", getEntry().toString());
 		 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
 		
 		 return resultMap;
