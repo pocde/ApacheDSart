@@ -21,11 +21,11 @@ public class ADSUserTest {
 	String portStr="10389";
 	String groupDn="cn=OOTestGroup,ou=CODARProjects,dc=example,dc=com";
 	String groupObjects="groupOfNames";
-	String groupEntries = "cn:OOTestGroup;member:uid=markus,ou=CSAUsers,dc=example,dc=com";
+	String groupEntries = "cn=OOTestGroup;member=uid=markus,ou=CSAUsers,dc=example,dc=com";
 	String uid = "markus";
 	String dn = "uid="+uid+",ou=CSAUsers,dc=example,dc=com";
 	String objects = "inetOrgPerson,Person,organizationalPerson,extensibleObject";
-	String entries = "uid:"+uid+";cn:markus;sn:Markus";
+	String entries = "uid="+uid+";cn=markus;sn=Markus";
 	String userPassword = "cloud"; // "{SHA}AA55PbcMWTCfpvDzbQBG0RDzvjw=";
 	LdapSecurityConstants lsc = LdapSecurityConstants.HASH_METHOD_SHA;
 	
@@ -61,7 +61,6 @@ public class ADSUserTest {
 		if (lazy) {
 			assertTrue("Error message: "+result.get("resultMessage"), 
 					ret.equals("0") || ret.equals("-4"));
-			System.out.println("message: "+result.get("addMessage"));
 		} else {
 			assertTrue("Error message: "+result.get("resultMessage"), ret.equals("0"));
 		}
@@ -90,7 +89,6 @@ public class ADSUserTest {
 		if (lazy) {
 			assertTrue("Error message: "+result.get("resultMessage"), 
 					ret.equals("0") || ret.equals("-4"));
-			System.out.println("message: "+result.get("addMessage"));
 		} else {
 			assertTrue("Error message: "+result.get("resultMessage"), ret.equals("0"));
 		}
@@ -188,5 +186,74 @@ public class ADSUserTest {
 		
 		assertTrue("passwords are not the same",
 				PasswordUtil.compareCredentials(userPassword.getBytes(), pass));
+	}
+	
+	@Test
+	public void testDeleteObject()
+	{
+		Map<String,String> result = new HashMap<String,String>();
+		ADSUser user = new ADSUser();
+
+		String uid = "deleteUser";
+		String dn = "uid="+uid+",ou=CSAUsers,dc=example,dc=com";
+		String objects = "inetOrgPerson,Person,organizationalPerson,extensibleObject";
+		String entries = "uid="+uid+";cn=PleaseDelete;sn=PleaseDelete";
+		String userPassword = "cloud"; // "{SHA}AA55PbcMWTCfpvDzbQBG0RDzvjw=";
+		LdapSecurityConstants lsc = LdapSecurityConstants.HASH_METHOD_SHA;
+		
+		result = user.addObjectToADS(username, password, host, portStr, 
+					dn, objects, entries, userPassword , lsc.toString());
+		
+		/*
+		 * add object just to delete it in the next step
+		 */
+		assertTrue("user could not be initialized to test function 'deleteObject'",
+				result.get("returnResult").equals("0"));
+	
+		/*
+		 * delete the object. This is the main test!
+		 */
+		result = user.deleteObjectinADS(username, password, host, portStr, dn);
+		assertTrue("object could not be deleted", result.get("returnResult").equals("0"));
+	}
+	
+	@Test
+	public void testChangeObject()
+	{
+		Map<String,String> result = new HashMap<String,String>();
+		ADSUser user = new ADSUser();
+
+		String uid = "changeUser";
+		String dn = "uid="+uid+",ou=CSAUsers,dc=example,dc=com";
+		String objects = "inetOrgPerson,Person,organizationalPerson,extensibleObject";
+		String entries = "cn=PleaseChange;sn=PleaseChange";
+		String userPassword = "cloud"; // "{SHA}AA55PbcMWTCfpvDzbQBG0RDzvjw=";
+		LdapSecurityConstants lsc = LdapSecurityConstants.HASH_METHOD_MD5;
+		String modifyStr = "ADD: emailAddress=test@poc.de1.cc; ADD: info=test";
+		
+		/*
+		 * add object just to delete it in the next step
+		 */
+		result = user.addObjectToADS(username, password, host, portStr, 
+					dn, objects, entries, userPassword , lsc.toString());
+		
+		assertTrue("user could not be initialized to test function 'deleteObject'",
+				result.get("returnResult").equals("0"));
+
+		result = user.changeObjectInADS(username, password, host, portStr, dn, modifyStr, "", "");
+		assertTrue("could not change attribute",
+				result.get("returnResult").equals("0"));
+		
+		modifyStr = "REPLACE: cn=changed; REPLACE: emailAddress=done@poc.de1.cc";
+		result = user.changeObjectInADS(username, password, host, portStr, dn, modifyStr, "test", lsc.toString());
+		assertTrue("could not change attribute",
+				result.get("returnResult").equals("0"));
+		
+		/*
+		 * clean up: delete user again
+		 */
+		result = user.deleteObjectinADS(username, password, host, portStr, dn);
+		assertTrue("could not delete user",
+				result.get("returnResult").equals("0"));
 	}
 }

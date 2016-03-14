@@ -4,7 +4,7 @@
 
     <groupId>ApacheGroup</groupId>
     <artifactId>ApacheDSart</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Apache Directory Server Steps</name>

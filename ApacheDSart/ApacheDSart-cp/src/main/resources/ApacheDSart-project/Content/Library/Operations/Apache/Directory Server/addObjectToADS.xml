@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <operation id="8fa2e9b5-695d-4642-9644-47f0e3bd9083">
-  <descriptionCdata><![CDATA[8fa2e9b5-695d-4642-9644-47f0e3bd9083.description=add an object to the Apache Directory server (ADS)\n\nInputs\:\nusername\: the ussername to connect to the ADSr to (i.e. uid\=admin,ou\=system).\npassword\: the password for the user to connect to the ADS.\nhost\: hostname or IP-address of the ADS\nport\: port to connect with (defaults to 10389)\nDN\: the DN of the object to be added\nobjectclass\: a comma-seperated list of objectclasses to use (objectclass 'top' is always added and can be ommited here)\nentries\: a list of key-value-pairs to add to the obejct. format\: key\: value; key\: value; ...\nuserPassword\: if the object should have a password (i.e. for users) this entry contains the password. It will be encrypted with the password algorithm chosen below.\npasswordAlg\: password algorithm used to encrypt the userPassword. For a complete list see Select List\: Apache Directory Serevr password algorithm\n\nOutputs\:\nresultMessage\: contains information about the status of the action\n
+  <descriptionCdata><![CDATA[8fa2e9b5-695d-4642-9644-47f0e3bd9083.description=add an object to the Apache Directory server (ADS)\n\nInputs\:\nusername\: the ussername to connect to the ADSr to (i.e. uid\=admin,ou\=system).\npassword\: the password for the user to connect to the ADS.\nhost\: hostname or IP-address of the ADS\nport\: port to connect with (defaults to 10389)\nDN\: the DN of the object to be added\nobjectclass\: a comma-seperated list of objectclasses to use (objectclass 'top' is always added and can be ommited here)\nentries\: a list of key-value-pairs to add to the obejct. format\: key\= value; key\= value; ...\nuserPassword\: if the object should have a password (i.e. for users) this entry contains the password. It will be encrypted with the password algorithm chosen below.\npasswordAlg\: password algorithm used to encrypt the userPassword. For a complete list see Select List\: Apache Directory Serevr password algorithm\n\nOutputs\:\nresultMessage\: contains information about the status of the action\n
 ]]></descriptionCdata>
   <annotation>8fa2e9b5-695d-4642-9644-47f0e3bd9083.description</annotation>
   <name>addObjectToADS</name>
@@ -186,7 +186,7 @@
   <plugin>
     <groupId>ApacheGroup</groupId>
     <artifactId>ApacheDSart-plugin</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
     <actionName>addObjectToADS</actionName>
   </plugin>
   <fieldValues/>

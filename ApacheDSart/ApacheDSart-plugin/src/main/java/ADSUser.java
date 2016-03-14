@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -6,9 +7,14 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.DefaultEntry;
+import org.apache.directory.api.ldap.model.entry.DefaultModification;
+import org.apache.directory.api.ldap.model.entry.Modification;
+import org.apache.directory.api.ldap.model.entry.ModificationOperation;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
+import org.apache.directory.api.ldap.model.message.DeleteResponse;
 import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.api.ldap.model.password.PasswordUtil;
 import org.apache.directory.api.ldap.model.constants.LdapSecurityConstants;
@@ -58,7 +64,8 @@ public class ADSUser {
 		 getConnection().unBind();
 		 getConnection().close();
 	 }	
-	
+	 
+
 	 /*
 	  * now we handle Ldap entries and organize them
 	  */
@@ -105,7 +112,7 @@ public class ADSUser {
 					 		"\nInputs:\n"+
 					 		"objectClasses: comma separated list of objectclass"+
 					 		"to add. The objectclass 'top' will be added by default.\n"+
-					 		"entries: list of entires to add. Format: key:value;key:value...",
+					 		"entries: list of entires to add. Format: key=value;key=value...",
 			 outputs = { @Output(OutputNames.RETURN_RESULT) },
 			 responses = {
 					 @Response(text = ResponseNames.SUCCESS, field = OutputNames.RETURN_RESULT, value = "0", matchType = MatchType.COMPARE_GREATER_OR_EQUAL, responseType = ResponseType.RESOLVED),
@@ -184,15 +191,15 @@ public class ADSUser {
 		 }
 		
 		 /*
-		  * sting is split by ; and : because we commas and equal signs
+		  * sting is split by ';' and first appearance of '=' because we commas and equal signs
 		  */
 		 for (String en: entries.split(";")) {
-			 String key = en.split(":")[0];
-			 String value = en.split(":")[1];
 			 try {
-				addEntry(key, value);
+				 String key = en.split("=", 2)[0].trim();
+				 String value = en.split("=", 2)[1].trim();
+				 addEntry(key, value);
 			} catch (LdapException e) {
-				logger.info("key value pair problem: "+key+" "+value);
+				 logger.info("key value pair problem:\n"+e.getMessage());
 			}
 		 }
 		 
@@ -240,6 +247,201 @@ public class ADSUser {
 		 }
 		 
 		
+		 resultMap.put("resultMessage", getEntry().toString());
+		 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
+		
+		 return resultMap;
+	 }
+	 
+	 public Map<String,String> changeObjectInADS(
+			 @Param(value = "username", required = true) String username,
+			 @Param(value = "password", encrypted = true) String password,
+			 @Param(value = "host", required = true) String host,
+			 @Param(value = "port") String portStr,
+			 @Param(value = "DN", required = true) String dn,
+			 @Param(value = "modify") String modifyStr,
+			 @Param(value = "userPassword", encrypted = true) String userPassword,
+			 @Param(value = "passwordAlg") String lsc
+			 ) 
+	 {
+		 Map <String,String> resultMap = new HashMap<String,String>();
+		
+		 int port = 10389;  // default port for Apache Directory Server
+		 LdapSecurityConstants algorithm = null;
+		 
+		 if (!lsc.isEmpty()) try {
+			 algorithm = LdapSecurityConstants.valueOf(lsc);
+		 } catch (Exception e) {
+			 logger.info("algorithm not found");
+			 resultMap.put("resultMessage", "could not get algorithm");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-2));
+			 return resultMap;
+		 }
+		 
+		 /*
+		  * All inputs from an OO step are strings! So we need to convert port 
+		  * to an integer. 
+		  */
+		 try {
+			 port = Integer.valueOf(portStr);
+		 } catch (Exception e) {
+			 port = 10389;
+		 }
+			
+		 /*
+		  * connect to LDAP
+		  */
+		 try {
+			 connectAndBind(host, port, username, password);
+		 } catch (Exception e) {
+			 resultMap.put("resultMessage", "server not reachable");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
+			 return resultMap;
+		 }
+
+				 
+		 /*
+		  * we need to look for the changes here.
+		  * format:
+		  * ADD: key, value
+		  * REPLACE: key, value
+		  * REMOVE: key
+		  * 
+		  * The replace function is not aware of multiple entries!
+		  */
+		 Map<String,Modification> mod = new HashMap<String,Modification>();
+		 Integer item = 0;
+		 for (String en: modifyStr.split(";")) {
+			 try {
+				 String change = en.split(":")[0].toUpperCase().trim();
+				 String keyvalue = en.split(":")[1].trim();
+				 
+				 String key = keyvalue.split("=", 2)[0];
+				 String value = keyvalue.split("=", 2)[1];
+	
+				 /*
+				  * if the change keyword (i.e. add, replace, remove) was
+				  * not found than nothing will be put on the hashmap!
+				  */
+				 
+				 if (change.equals("ADD")) {
+					Modification add = new DefaultModification(ModificationOperation.ADD_ATTRIBUTE, key, value);
+					mod.put(item.toString(), add);
+				 }
+				 if (change.equals("REPLACE")) {
+					Modification replace = new DefaultModification(ModificationOperation.REPLACE_ATTRIBUTE, key, value);
+					mod.put(item.toString(), replace);
+				 }
+				 if (change.equals("REMOVE")) {
+					Modification remove = new DefaultModification(ModificationOperation.REMOVE_ATTRIBUTE, key, value);
+					mod.put(item.toString(), remove);
+				 }
+				 item++;
+			} catch (Exception e) {
+				 logger.info("key value pair problem:\n"+e.getMessage());
+			}
+		 } 
+		 
+		 if (!userPassword.isEmpty()) {
+			 if (!lsc.isEmpty()) {
+				 userPassword = encryptPass(userPassword, algorithm);
+			 }
+			 
+			 try {
+					Modification changePasswd = new DefaultModification(ModificationOperation.REPLACE_ATTRIBUTE, "userPassword", userPassword);
+					mod.put("passwd", changePasswd);
+			 } catch (Exception e) {
+				 logger.info("key value pair problem:\n"+e.getMessage());
+			 }
+		 } 
+		 
+		 /*
+		  * put all entries into a Modification list so that all entries can
+		  * be submitted once. this is important because Apache DS handles
+		  * data consistency.
+		  */
+		 Modification[] values = new Modification[mod.size()];
+		 int index = 0;
+		 for (Map.Entry<String, Modification> value: mod.entrySet()){
+			 values[index++] = value.getValue();
+		 }
+		 
+		 /*
+		  * make the changes to Apache DS now!
+		  */
+		 try {
+			 getConnection().modify(dn, values);
+		} catch (LdapException e) {
+			 resultMap.put("resultMessage", "could not apply changes");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-4));
+			 return resultMap;
+		}
+		 
+		 resultMap.put("resultMessage", getEntry().toString());
+		 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
+		
+		 return resultMap;
+	 }
+	 
+	 public Map<String,String> deleteObjectinADS(
+			 @Param(value = "username", required = true) String username,
+			 @Param(value = "password", encrypted = true) String password,
+			 @Param(value = "host", required = true) String host,
+			 @Param(value = "port") String portStr,
+			 @Param(value = "DN", required = true) String dn)
+	 {
+		 Map <String,String> resultMap = new HashMap<String,String>();
+			
+		 int port = 10389;  // default port for Apache Directory Server
+		 
+
+		 /*
+		  * All inputs from an OO step are strings! So we need to convert port 
+		  * to an integer. 
+		  */
+		 try {
+			 port = Integer.valueOf(portStr);
+		 } catch (Exception e) {
+			 port = 10389;
+		 }
+		 
+		 /*
+		  * connect to LDAP
+		  */
+		 try {
+			 connectAndBind(host, port, username, password);
+		 } catch (Exception e) {
+			 resultMap.put("resultMessage", "server not reachable");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-3));
+			 return resultMap;
+		 }
+		 
+		 try {
+			getConnection().delete(dn);
+		} catch (LdapException e1) {
+			 logger.info("could not delete dn: "+dn);
+			 resultMap.put("resultMessage", "could not delete dn: "+dn);
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-2));
+			 return resultMap;
+		}
+		 
+		 /*
+		  * before we return from this step we need to clean up the connection
+		  * to the LDAP server
+		  */
+		 try {
+			 getConnection().unBind();
+			 getConnection().close();
+		 } catch (LdapException e) {
+			 logger.info("could not close connection to Ldap server: "+host);
+			 resultMap.put("resultMessage", "could not unbind connection to LDAP server");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
+			 return resultMap;
+		 } catch (IOException e) {
+			 resultMap.put("resultMessage", "could not close connection to LDAP server");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
+			 return resultMap;
+		 }
 		 resultMap.put("resultMessage", getEntry().toString());
 		 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
 		
