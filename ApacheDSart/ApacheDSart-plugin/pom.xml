@@ -5,7 +5,7 @@
     <parent>
         <groupId>ApacheGroup</groupId>
         <artifactId>ApacheDSart</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.3</version>
     </parent>
     <artifactId>ApacheDSart-plugin</artifactId>
     <packaging>maven-plugin</packaging>

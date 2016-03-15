@@ -102,18 +102,12 @@ public class ADSUserTest {
 	 */
 	@Test
 	public void testLdapConnection() {
-		int port=10389;
 		
-		try {
-			port=Integer.valueOf(portStr);
-		} catch (Exception e) {
-			System.out.println("cannot convert string portStr to integer");
-		}
-		
+	
 		ADSUser user = new ADSUser();
 		
 		try {
-			user.connectAndBind(host, port, username, password);
+			user.connectAndBind(host, portStr, username, password);
 		} catch (LdapException e) {
 			fail("connection to Ldap could not be established");
 		} catch (IOException e) {
@@ -213,7 +207,7 @@ public class ADSUserTest {
 		/*
 		 * delete the object. This is the main test!
 		 */
-		result = user.deleteObjectinADS(username, password, host, portStr, dn);
+		result = user.deleteObjectInADS(username, password, host, portStr, dn);
 		assertTrue("object could not be deleted", result.get("returnResult").equals("0"));
 	}
 	
@@ -252,7 +246,7 @@ public class ADSUserTest {
 		/*
 		 * clean up: delete user again
 		 */
-		result = user.deleteObjectinADS(username, password, host, portStr, dn);
+		result = user.deleteObjectInADS(username, password, host, portStr, dn);
 		assertTrue("could not delete user",
 				result.get("returnResult").equals("0"));
 	}

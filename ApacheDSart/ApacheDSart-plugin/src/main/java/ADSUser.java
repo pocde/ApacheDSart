@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +13,6 @@ import org.apache.directory.api.ldap.model.entry.Modification;
 import org.apache.directory.api.ldap.model.entry.ModificationOperation;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.exception.LdapInvalidDnException;
-import org.apache.directory.api.ldap.model.message.DeleteResponse;
 import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.api.ldap.model.password.PasswordUtil;
 import org.apache.directory.api.ldap.model.constants.LdapSecurityConstants;
@@ -39,7 +37,7 @@ public class ADSUser {
 	static Logger logger = LoggerFactory.getLogger(ADSUser.class);
 	
 	/*
-	 * firt we handle Ldap connections
+	 * first we handle Ldap connections
 	 */
 	private LdapConnection connection;
 	
@@ -51,15 +49,23 @@ public class ADSUser {
 		 this.connection = connection;
 	 }
 
-	 public void connectAndBind(String host, int port, String username, String password) throws LdapException, IOException {
+	 public void connectAndBind(String host, String portStr, String username, String password) throws LdapException, IOException {
+		 int port = 10389;  // default port for Apache Directory Server
+		 /*
+		  * All inputs from an OO step are strings! So we need to convert port 
+		  * to an integer. 
+		  */
+		 try {
+			 port = Integer.valueOf(portStr);
+		 } catch (Exception e) {
+			 port = 10389;
+		 }
+		 
 		 setConnection(new LdapNetworkConnection(host, port));
 		 getConnection().bind(username, password);  
 	 }
 
-	 public void unbind() throws LdapException {
-		 getConnection().unBind();
-	 }
-
+	 
 	 public void close() throws IOException, LdapException {
 		 getConnection().unBind();
 		 getConnection().close();
@@ -106,7 +112,7 @@ public class ADSUser {
 	 }
 	 
 	  
-	 @Action(value = "addObjectToADS",
+	 @Action(value = "add entry to Apache DS",
 			 description = "adds an object to the Apache Directory Server\n"+
 					 		"An object could be an user or a group.\n"+
 					 		"\nInputs:\n"+
@@ -123,7 +129,7 @@ public class ADSUser {
 			 @Param(value = "username", required = true) String username,
 			 @Param(value = "password", encrypted = true) String password,
 			 @Param(value = "host", required = true) String host,
-			 @Param(value = "port") String portStr,
+			 @Param(value = "port") String port,
 			 @Param(value = "DN", required = true) String dn,
 			 @Param(value = "objectClasses") String objClasses,
 			 @Param(value = "entries") String entries,
@@ -132,7 +138,6 @@ public class ADSUser {
 			 )
 	 {
 		 Map<String, String> resultMap = new HashMap<String, String>();
-		 int port = 10389;  // default port for Apache Directory Server
 		 LdapSecurityConstants algorithm = null;
 		 String[] objects = objClasses.split(",");
 		 
@@ -154,16 +159,6 @@ public class ADSUser {
 			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-2));
 			 return resultMap;
 		}
-		
-		 /*
-		  * All inputs from an OO step are strings! So we need to convert port 
-		  * to an integer. 
-		  */
-		 try {
-			 port = Integer.valueOf(portStr);
-		 } catch (Exception e) {
-			 port = 10389;
-		 }
 			
 		 /*
 		  * connect to LDAP
@@ -233,8 +228,7 @@ public class ADSUser {
 		  * to the LDAP server
 		  */
 		 try {
-			 getConnection().unBind();
-			 getConnection().close();
+			 close();
 		 } catch (LdapException e) {
 			 logger.info("could not close connection to Ldap server: "+host);
 			 resultMap.put("resultMessage", "could not unbind connection to LDAP server");
@@ -253,11 +247,22 @@ public class ADSUser {
 		 return resultMap;
 	 }
 	 
+	 
+	 @Action(value = "change entry in Apache DS",
+			 description = "changes attributes of an object in Apache Directory Server\n",
+			 outputs = { @Output(OutputNames.RETURN_RESULT),
+					 @Output("resultMessage") 
+			 },
+			 responses = {
+					 @Response(text = ResponseNames.SUCCESS, field = OutputNames.RETURN_RESULT, value = "0", matchType = MatchType.COMPARE_GREATER_OR_EQUAL, responseType = ResponseType.RESOLVED),
+					 @Response(text = ResponseNames.FAILURE, field = OutputNames.RETURN_RESULT, value = "0", matchType = MatchType.COMPARE_LESS, responseType = ResponseType.ERROR)
+	 		 }	
+	 )	
 	 public Map<String,String> changeObjectInADS(
 			 @Param(value = "username", required = true) String username,
 			 @Param(value = "password", encrypted = true) String password,
 			 @Param(value = "host", required = true) String host,
-			 @Param(value = "port") String portStr,
+			 @Param(value = "port") String port,
 			 @Param(value = "DN", required = true) String dn,
 			 @Param(value = "modify") String modifyStr,
 			 @Param(value = "userPassword", encrypted = true) String userPassword,
@@ -266,7 +271,6 @@ public class ADSUser {
 	 {
 		 Map <String,String> resultMap = new HashMap<String,String>();
 		
-		 int port = 10389;  // default port for Apache Directory Server
 		 LdapSecurityConstants algorithm = null;
 		 
 		 if (!lsc.isEmpty()) try {
@@ -278,16 +282,6 @@ public class ADSUser {
 			 return resultMap;
 		 }
 		 
-		 /*
-		  * All inputs from an OO step are strings! So we need to convert port 
-		  * to an integer. 
-		  */
-		 try {
-			 port = Integer.valueOf(portStr);
-		 } catch (Exception e) {
-			 port = 10389;
-		 }
-			
 		 /*
 		  * connect to LDAP
 		  */
@@ -377,34 +371,121 @@ public class ADSUser {
 			 return resultMap;
 		}
 		 
-		 resultMap.put("resultMessage", getEntry().toString());
+		 Entry entry = null;
+		 try {
+			entry = getConnection().lookup(dn);
+			resultMap.put("resultMessage", entry.toString());
+		 } catch (Exception e) {
+			logger.info("could not lookup dn "+dn);
+			resultMap.put("resultMessage", "entry changed");
+		 }
+		 
+		 /*
+		  * before we return from this step we need to clean up the connection
+		  * to the LDAP server
+		  */
+		 try {
+			 close();
+		 } catch (LdapException e) {
+			 logger.info("could not close connection to Ldap server: "+host);
+			 resultMap.put("resultMessage", "could not unbind connection to LDAP server");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
+			 return resultMap;
+		 } catch (IOException e) {
+			 resultMap.put("resultMessage", "could not close connection to LDAP server");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
+			 return resultMap;
+		 }
 		 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
 		
 		 return resultMap;
 	 }
 	 
-	 public Map<String,String> deleteObjectinADS(
+	 @Action(value = "lookup entry in Apache DS",
+			 description = "returns an entry in the Apache Directory Server\n",
+			 outputs = { @Output(OutputNames.RETURN_RESULT),
+					     @Output("entry"),
+					     @Output("resultMessage")
+			 },
+			 responses = {
+					 @Response(text = ResponseNames.SUCCESS, field = OutputNames.RETURN_RESULT, value = "0", matchType = MatchType.COMPARE_GREATER_OR_EQUAL, responseType = ResponseType.RESOLVED),
+					 @Response(text = ResponseNames.FAILURE, field = OutputNames.RETURN_RESULT, value = "0", matchType = MatchType.COMPARE_LESS, responseType = ResponseType.ERROR)
+	 		 }	
+	 )	
+	 public Map<String,String> lookupObjectInADS(
 			 @Param(value = "username", required = true) String username,
 			 @Param(value = "password", encrypted = true) String password,
 			 @Param(value = "host", required = true) String host,
-			 @Param(value = "port") String portStr,
+			 @Param(value = "port") String port,
 			 @Param(value = "DN", required = true) String dn)
 	 {
 		 Map <String,String> resultMap = new HashMap<String,String>();
 			
-		 int port = 10389;  // default port for Apache Directory Server
-		 
-
 		 /*
-		  * All inputs from an OO step are strings! So we need to convert port 
-		  * to an integer. 
+		  * connect to LDAP
 		  */
 		 try {
-			 port = Integer.valueOf(portStr);
+			 connectAndBind(host, port, username, password);
 		 } catch (Exception e) {
-			 port = 10389;
+			 resultMap.put("resultMessage", "server not reachable");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-3));
+			 return resultMap;
 		 }
 		 
+		 Entry entry = null;
+		 try {
+			entry = getConnection().lookup(dn);
+			resultMap.put("entry", entry.toString());
+			resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
+			
+		 } catch (Exception e) {
+			logger.info("could not lookup dn "+dn);
+			resultMap.put("resultMessage", "entry not found");
+			resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
+			
+		 }
+	
+		 /*
+		  * before we return from this step we need to clean up the connection
+		  * to the LDAP server
+		  */
+		 try {
+			 close();
+		 } catch (LdapException e) {
+			 logger.info("could not close connection to Ldap server: "+host);
+			 resultMap.put("resultMessage", "could not unbind connection to LDAP server");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(1));
+			 return resultMap;
+		 } catch (IOException e) {
+			 resultMap.put("resultMessage", "could not close connection to LDAP server");
+			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(1));
+			 return resultMap;
+		 }
+		 
+		 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
+		
+		 return resultMap;
+	 }
+	 
+	 @Action(value = "delete entry in Apache DS",
+			 description = "deletes an object in the Apache Directory Server\n",
+			 outputs = { @Output(OutputNames.RETURN_RESULT),
+					     @Output("resultMessage")
+			 },
+			 responses = {
+					 @Response(text = ResponseNames.SUCCESS, field = OutputNames.RETURN_RESULT, value = "0", matchType = MatchType.COMPARE_GREATER_OR_EQUAL, responseType = ResponseType.RESOLVED),
+					 @Response(text = ResponseNames.FAILURE, field = OutputNames.RETURN_RESULT, value = "0", matchType = MatchType.COMPARE_LESS, responseType = ResponseType.ERROR)
+	 		 }	
+	 )	
+	 public Map<String,String> deleteObjectInADS(
+			 @Param(value = "username", required = true) String username,
+			 @Param(value = "password", encrypted = true) String password,
+			 @Param(value = "host", required = true) String host,
+			 @Param(value = "port") String port,
+			 @Param(value = "DN", required = true) String dn)
+	 {
+		 Map <String,String> resultMap = new HashMap<String,String>();
+			
 		 /*
 		  * connect to LDAP
 		  */
@@ -430,8 +511,7 @@ public class ADSUser {
 		  * to the LDAP server
 		  */
 		 try {
-			 getConnection().unBind();
-			 getConnection().close();
+			 close();
 		 } catch (LdapException e) {
 			 logger.info("could not close connection to Ldap server: "+host);
 			 resultMap.put("resultMessage", "could not unbind connection to LDAP server");
@@ -442,7 +522,7 @@ public class ADSUser {
 			 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(-1));
 			 return resultMap;
 		 }
-		 resultMap.put("resultMessage", getEntry().toString());
+		 resultMap.put("resultMessage", "Entry deleted");
 		 resultMap.put(OutputNames.RETURN_RESULT, String.valueOf(0));
 		
 		 return resultMap;
