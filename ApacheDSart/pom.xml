@@ -13,6 +13,7 @@
     <properties>
         <sdk.group>com.hp.oo.sdk</sdk.group>
         <sdk.version>10.20.8</sdk.version>
+        <plugin.version>1.0.4</plugin.version>
     </properties>
 
     <build>

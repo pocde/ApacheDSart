@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operation id="88da3ed6-dc67-416e-9bb1-23b380716866">
+  <descriptionCdata><![CDATA[88da3ed6-dc67-416e-9bb1-23b380716866.description=add an object to the Apache Directory server (ADS)\n\nInputs\:\nusername\: the ussername to connect to the ADSr to (i.e. uid\=admin,ou\=system).\npassword\: the password for the user to connect to the ADS.\nhost\: hostname or IP-address of the ADS\nport\: port to connect with (defaults to 10389)\nDN\: the DN of the object to be added\nobjectclass\: a comma-seperated list of objectclasses to use (objectclass 'top' is always added and can be ommited here)\nentries\: a list of key-value-pairs to add to the obejct. format\: key\= value; key\= value; ...\nuserPassword\: if the object should have a password (i.e. for users) this entry contains the password. It will be encrypted with the password algorithm chosen below.\npasswordAlg\: password algorithm used to encrypt the userPassword. For a complete list see Select List\: Apache Directory Serevr password algorithm\n\nOutputs\:\nresultMessage\: contains information about the status of the action\n
+]]></descriptionCdata>
+  <annotation>88da3ed6-dc67-416e-9bb1-23b380716866.description</annotation>
+  <name>add entry to Apache DS</name>
+  <categories/>
+  <inputs>
+    <userInputBinding id="467229dc-22b4-45ed-8c38-2b08cea654e0">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>true</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>username</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="095dadef-23e4-44c4-ac65-735e2745a1b1">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>ENCRYPTED</inputType>
+      <isList>false</isList>
+      <required>false</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>password</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="badaeff8-3c40-486f-8208-1d7f833da49c">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>true</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>host</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="510d79f2-e7ba-40f3-a7a9-bf2e1a300fbe">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>false</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>port</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="e261e9d1-b6da-4403-83e2-d4ce7d672b98">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>true</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>DN</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="acc89190-8dc4-4979-a69e-677bbd42ab37">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>false</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>objectClasses</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="304deaae-696b-4e99-a76e-7c972850252e">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>false</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>entries</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="56c689f1-720f-4bcd-8eb6-6e6aa82ab1da">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>ENCRYPTED</inputType>
+      <isList>false</isList>
+      <required>false</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>userPassword</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="83ce3b2b-7a6b-4903-98ec-b8cda1abe924">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>false</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>passwordAlg</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+  </inputs>
+  <possibleResponses>
+    <opResponse id="ad0b69ea-f23e-4b92-926c-3c8711e877d6">
+      <annotation></annotation>
+      <name>success</name>
+      <isDefault>false</isDefault>
+      <onFailure>false</onFailure>
+      <type>RESOLVED</type>
+      <matchRules>
+        <expression id="15edef39-f3b9-44eb-8f2e-db8c60450089">
+          <annotation></annotation>
+          <name>returnResult</name>
+          <fieldName>returnResult</fieldName>
+          <sourceType>RAWRESULT</sourceType>
+          <compare id="6c0d3101-6b47-4b12-8d4c-6bd54ad6e9db">
+            <annotation></annotation>
+            <name>Config Item</name>
+            <text>0</text>
+            <matchType>&gt;=</matchType>
+          </compare>
+          <filters/>
+        </expression>
+      </matchRules>
+    </opResponse>
+    <opResponse id="bb39a830-aa95-4ba9-b7d3-da1d2ae5b731">
+      <annotation></annotation>
+      <name>failure</name>
+      <isDefault>true</isDefault>
+      <onFailure>false</onFailure>
+      <type>ERROR</type>
+      <matchRules>
+        <expression id="323c5de0-4db6-41c1-9cae-4ef39991c3ce">
+          <annotation></annotation>
+          <name>returnResult</name>
+          <fieldName>returnResult</fieldName>
+          <sourceType>RAWRESULT</sourceType>
+          <compare id="c80a3329-0ef6-49b2-a95c-a1ef5fb4aef4">
+            <annotation></annotation>
+            <name>Config Item</name>
+            <text>0</text>
+            <matchType>&lt;</matchType>
+          </compare>
+          <filters/>
+        </expression>
+      </matchRules>
+    </opResponse>
+  </possibleResponses>
+  <availableResultExpressions/>
+  <iconSpec id="f94d1e27-5412-4801-868b-0d9d82df7bc2">
+    <baseIcon>webservice.png</baseIcon>
+    <basePath>System</basePath>
+    <readOnly>false</readOnly>
+    <layers/>
+  </iconSpec>
+  <plugin>
+    <groupId>cc.de1.poc</groupId>
+    <artifactId>ApacheDSart-plugin</artifactId>
+    <version>${plugin.version}</version>
+    <actionName>add entry to Apache DS</actionName>
+  </plugin>
+  <fieldValues/>
+  <overrideGroupAlias>${overrideJRAS}</overrideGroupAlias>
+</operation>

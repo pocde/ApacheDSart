@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<operation id="4220cb94-69f1-4d1f-8035-d44c8cdb7265">
+  <descriptionCdata><![CDATA[4220cb94-69f1-4d1f-8035-d44c8cdb7265.description=deletes an object in the Apache Directory Server\n\nInputs\:\nusername\: the ussername to connect to the ADSr to (i.e. uid\=admin,ou\=system).\npassword\: the password for the user to connect to the ADS.\nhost\: hostname or IP-address of the ADS\nport\: port to connect with (defaults to 10389)\nDN\: the DN of the object to be deleted
+]]></descriptionCdata>
+  <annotation>4220cb94-69f1-4d1f-8035-d44c8cdb7265.description</annotation>
+  <name>delete entry in Apache DS</name>
+  <categories/>
+  <inputs>
+    <userInputBinding id="46a3766a-7c0f-44de-8b2c-98c9fc66653b">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>true</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>username</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="1df3eafc-3a2d-4984-84d8-8b7657ff0e0d">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>ENCRYPTED</inputType>
+      <isList>false</isList>
+      <required>false</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>password</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="dfb18707-25f7-44c2-b29e-6e8a073e18ec">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>true</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>host</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="e9a66cde-dbd8-4d5a-9f5d-e6131570a3c1">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>false</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>port</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+    <userInputBinding id="6f3b2ac2-b2f7-4770-b26f-79ca4c3e343b">
+      <annotation></annotation>
+      <assignFromContext>false</assignFromContext>
+      <assignToContext>false</assignToContext>
+      <inputType>STRING</inputType>
+      <isList>false</isList>
+      <required>true</required>
+      <isPersisted>true</isPersisted>
+      <inputSymbol>DN</inputSymbol>
+      <listDelimiter>,</listDelimiter>
+      <record>false</record>
+      <prompt></prompt>
+      <isMultiSelect>false</isMultiSelect>
+      <sourceDelimiter>|</sourceDelimiter>
+    </userInputBinding>
+  </inputs>
+  <possibleResponses>
+    <opResponse id="b96474ac-a3ba-4126-aa25-47e789d17732">
+      <annotation></annotation>
+      <name>success</name>
+      <isDefault>false</isDefault>
+      <onFailure>false</onFailure>
+      <type>RESOLVED</type>
+      <matchRules>
+        <expression id="d366f0eb-4fb9-433a-8611-417f27112582">
+          <annotation></annotation>
+          <name>returnResult</name>
+          <fieldName>returnResult</fieldName>
+          <sourceType>RAWRESULT</sourceType>
+          <compare id="845bfe41-fb3b-41d6-8641-ea0bbacef784">
+            <annotation></annotation>
+            <name>Config Item</name>
+            <text>0</text>
+            <matchType>&gt;=</matchType>
+          </compare>
+          <filters/>
+        </expression>
+      </matchRules>
+    </opResponse>
+    <opResponse id="70b9fe8f-90d9-4daf-b26a-67f025e59088">
+      <annotation></annotation>
+      <name>failure</name>
+      <isDefault>true</isDefault>
+      <onFailure>false</onFailure>
+      <type>ERROR</type>
+      <matchRules>
+        <expression id="b2db4834-f472-4d67-96af-6b595e5bb64b">
+          <annotation></annotation>
+          <name>returnResult</name>
+          <fieldName>returnResult</fieldName>
+          <sourceType>RAWRESULT</sourceType>
+          <compare id="8dfb6322-07a0-4faf-bcc4-f247b107b144">
+            <annotation></annotation>
+            <name>Config Item</name>
+            <text>0</text>
+            <matchType>&lt;</matchType>
+          </compare>
+          <filters/>
+        </expression>
+      </matchRules>
+    </opResponse>
+  </possibleResponses>
+  <availableResultExpressions/>
+  <iconSpec id="c2b05ff2-4ccd-47c1-a8a4-f3a669e6d87b">
+    <baseIcon>webservice.png</baseIcon>
+    <basePath>System</basePath>
+    <readOnly>false</readOnly>
+    <layers/>
+  </iconSpec>
+  <plugin>
+    <groupId>cc.de1.poc</groupId>
+    <artifactId>ApacheDSart-plugin</artifactId>
+    <version>${plugin.version}</version>
+    <actionName>delete entry in Apache DS</actionName>
+  </plugin>
+  <fieldValues/>
+  <overrideGroupAlias>${overrideJRAS}</overrideGroupAlias>
+</operation>

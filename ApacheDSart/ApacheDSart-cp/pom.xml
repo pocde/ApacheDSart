@@ -14,6 +14,11 @@
         <resources>
             <resource>
                 <directory>${project.basedir}/src/main/resources/ApacheDSart-project</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+            	<directory>${project.basedir}/src/main/resources/ApacheDSart-project/Content/Library/Operations/Apache/Directory Server</directory>
+            	<filtering>true</filtering>
             </resource>
         </resources>
 

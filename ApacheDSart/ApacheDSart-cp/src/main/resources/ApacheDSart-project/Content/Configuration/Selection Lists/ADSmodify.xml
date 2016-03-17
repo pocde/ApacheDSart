@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selectionList id="cd7c0a15-583d-46bb-b317-dbd99fde4988">
+  <descriptionCdata>
+
+<![CDATA[cd7c0a15-583d-46bb-b317-dbd99fde4988.description=List of modify operations at Apache Directory ]]>
+
+</descriptionCdata>
+  <annotation>cd7c0a15-583d-46bb-b317-dbd99fde4988.description</annotation>
+  <name>Apache Directory Server modify attributes</name>
+  <storage>
+    <string>ADD</string>
+    <string>REMOVE</string>
+    <string>REPLACE</string>
+  </storage>
+</selectionList>
