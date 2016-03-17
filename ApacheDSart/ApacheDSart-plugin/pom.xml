@@ -5,7 +5,7 @@
     <parent>
         <groupId>cc.de1.poc</groupId>
         <artifactId>ApacheDS</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.4-SNAPSHOT</version>
     </parent>
     <artifactId>ApacheDS-plugin</artifactId>
     <packaging>maven-plugin</packaging>
