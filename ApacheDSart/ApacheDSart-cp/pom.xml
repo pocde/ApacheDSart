@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>ApacheGroup</groupId>
-        <artifactId>ApacheDSart</artifactId>
-        <version>1.0.3</version>
+        <groupId>cc.de1.poc</groupId>
+        <artifactId>ApacheDS</artifactId>
+        <version>1.0.4</version>
     </parent>
     <artifactId>ApacheDSart-cp</artifactId>
     <packaging>jar</packaging>

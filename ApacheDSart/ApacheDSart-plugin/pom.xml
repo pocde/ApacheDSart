@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>ApacheGroup</groupId>
-        <artifactId>ApacheDSart</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <groupId>cc.de1.poc</groupId>
+        <artifactId>ApacheDS</artifactId>
+        <version>1.0.4</version>
     </parent>
-    <artifactId>ApacheDSart-plugin</artifactId>
+    <artifactId>ApacheDS-plugin</artifactId>
     <packaging>maven-plugin</packaging>
 
     <dependencies>
