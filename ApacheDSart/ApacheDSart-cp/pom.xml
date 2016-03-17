@@ -5,7 +5,7 @@
     <parent>
         <groupId>cc.de1.poc</groupId>
         <artifactId>ApacheDS</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>1.0.4</version>
     </parent>
     <artifactId>ApacheDSart-cp</artifactId>
     <packaging>jar</packaging>

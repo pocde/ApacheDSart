@@ -4,7 +4,7 @@
 
     <groupId>cc.de1.poc</groupId>
     <artifactId>ApacheDS</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
     <packaging>pom</packaging>
 
     <name>Apache Directory Server Steps</name>
